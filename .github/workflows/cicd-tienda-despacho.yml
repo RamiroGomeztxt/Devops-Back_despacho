@@ -25,7 +25,7 @@ jobs:
     - name: Build, Tag, and Push Image to ECR
       env:
         REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        REPOSITORY: ${{ secrets.ECR_REPO_URL_BACKDESPACHO }} 
+        REPOSITORY: ${{ secrets.ECR_REPO_URL_BACKDESPACHO }}
         IMAGE_TAG: v1
       run: |
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./Springboot-API-REST-DESPACHO/dockerfile ./Springboot-API-REST-DESPACHO
