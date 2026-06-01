@@ -33,21 +33,20 @@ jobs:
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
     # ========================================================
-    # DESPLIEGUE SEGURO EN SUBRED PRIVADA USANDO AWS SSM (SIN LLAVES)
+    # DESPLIEGUE SEGURO EN SUBRED PRIVADA USANDO AWS CLI NATIVO (SSM)
     # ========================================================
-    - name: Deploy to Private EC2 via AWS SSM
-      uses: peterkimzz/aws-ssm-send-command@v1.1.1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
-        instance-ids: ${{ secrets.EC2_HOST }}  # El ID de tu instancia de   Despacho
-        comment: "Desplegando actualizacion de Backend Despacho sin llaves"
-        command: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-          mkdir -p ~/app-despacho && cd ~/app-despacho
-          docker pull ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPO_URL_BACKDESPACHO }}:v1
-          docker stop tienda-backend-despacho || true
-          docker rm tienda-backend-despacho || true
-          docker run -d -p 8081:8081 --name tienda-backend-despacho ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPO_URL_BACKDESPACHO }}:v1
+    - name: Deploy to Private EC2 via AWS CLI SSM
+      run: |
+        aws ssm send-command \
+          --instance-ids "${{ secrets.EC2_HOST }}" \
+          --document-name "AWS-RunShellScript" \
+          --comment "Desplegando actualizacion de Backend Despacho" \
+          --parameters 'commands=[
+            "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}",
+            "mkdir -p ~/app-despacho && cd ~/app-despacho",
+            "docker pull ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPO_URL_BACKDESPACHO }}:v1",
+            "docker stop tienda-backend-despacho || true",
+            "docker rm tienda-backend-despacho || true",
+            "docker run -d -p 8081:8081 --name tienda-backend-despacho ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPO_URL_BACKDESPACHO }}:v1"
+          ]' \
+          --region ${{ secrets.AWS_REGION }}
