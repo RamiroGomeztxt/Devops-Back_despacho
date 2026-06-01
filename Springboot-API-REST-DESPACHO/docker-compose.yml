@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  back-despacho:
+    build:
+      context: ./Springboot-API-REST-DESPACHO
+      dockerfile: dockerfile
+    container_name: tienda-backend-despacho
+    ports:
+      - "8081:8081"  # Mapea el puerto de tu aplicación Spring Boot
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # O las variables que use tu app
