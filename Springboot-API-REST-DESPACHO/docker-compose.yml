@@ -7,6 +7,13 @@ services:
       dockerfile: dockerfile
     container_name: tienda-backend-despacho
     ports:
-      - "8081:8081"  # Mapea el puerto de tu aplicación Spring Boot
+      - "8081:8081"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod  # O las variables que use tu app
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      # Mapea un volumen con nombre a la ruta interna de datos/logs de la app
+      - vol_data_despacho:/app/data
+
+volumes:
+  # Declaración del Named Volume gestionado por Docker
+  vol_data_despacho:
